@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response, json
+from flask import Flask, request, Response, json, make_response, render_template
 from boggle_solver import Boggle
 import secrets
 import time
@@ -11,8 +11,8 @@ games = {}
 counter = 1
 
 @app.route("/")
-def hello():
-    return "Hello World!"
+def land():
+    return make_response(render_template("landing.html"), 200)
 
 @app.route("/games", methods=["POST"])
 def create_game():
@@ -51,18 +51,19 @@ def create_game():
         json_response = json.dumps(temp)
         temp["points"] = 0 # initialize score
         temp["start"] = time.perf_counter() # initialize start time
-        temp["used_words"] = set()
+        temp["used_words"] = set() # use set to track words used for this game
         games[id] = (b, temp)
     return Response(json_response, status=201, mimetype='application/json')
 
 @app.route("/games/<int:id>", methods=["GET","PUT"])
 def game(id): #determines all responses to queries in game
+    if "duration" not in request.args:
+        return Response("duration missing", status=400)
+
     if id not in games:
-        return Response("id not found", status=404)
+        return Response("id not found", status=400)
     temp = games[id][1]
 
-    if request.args.get("token") != temp["token"]:
-        return Response("Incorrect Token", status=401)
 
     time_left = remaining_time(temp)
     temp["time_left"] = time_left
@@ -73,6 +74,12 @@ def game(id): #determines all responses to queries in game
         return show_game(id)
 
     if request.method == "PUT":
+        if "token" not in request.args:
+            return Response("security token missing", status=400)
+        if request.args.get("token") != temp["token"]:
+            return Response("incorrect token", status=401)
+        if "word" not in request.args:
+            return Response("No word submitted", status=400)
         word = request.args.get("word")
         return play_game(id, word)
 
