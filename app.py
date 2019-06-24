@@ -17,23 +17,27 @@ def land():
 @app.route("/games", methods=["POST"])
 def create_game():
     if request.method == "POST":
-        if "duration" not in request.args:
-            return Response("duration missing", status=400)
-        if "random" not in request.args:
-            return Response("random indicator missing", status=400)
+        content = request.get_json()
+        if content == None:
+            return Response(json.dumps({"message": "JSON payload missing"}), status=400)
+        if "duration" not in content:
+            return Response(json.dumps({"message": "duration was not provided"}), status=400)
+        if "random" not in content:
+            return Response(json.dumps({"message": "random was not provided"}), status=400)
         global counter, games
         b = None
         id = counter
         counter += 1
-        duration = request.args.get("duration")
-        rand = request.args.get("random")
+        duration = content["duration"]
+        rand = content["random"]
         board = ""
         token = token_generator()
-        if rand == "true": # generate random Boggle board
+        if rand: # generate random Boggle board
             b = Boggle(word_dic)
-        elif rand == "false":
-            if "board" in request.args: # use given board
-                board = request.args.get("board")
+            board = b.board
+        elif not rand:
+            if "board" in content: # use given board
+                board = content["board"]
                 b = Boggle(word_dic, board)
             else: # use default board
                 f = open("test_board.txt", "r")
@@ -55,45 +59,45 @@ def create_game():
         games[id] = (b, temp)
     return Response(json_response, status=201, mimetype='application/json')
 
-@app.route("/games/<int:id>", methods=["GET","PUT"])
+@app.route("/games/<id>", methods=["GET","PUT"])
 def game(id): #determines all responses to queries in game
-    if "duration" not in request.args:
-        return Response("duration missing", status=400)
-
+    content = request.get_json()
+    if content == None:
+        return Response(json.dumps({"message": "JSON payload missing"}), status=400)
+    id = int(id)
     if id not in games:
-        return Response("id not found", status=400)
+        return Response(json.dumps({"message": "invalid id"}), status=404)
     temp = games[id][1]
-
 
     time_left = remaining_time(temp)
     temp["time_left"] = time_left
     if time_left<0:
-        return Response("Time's up", status=200)
+        return Response(json.dumps({"message": "game duration exceeded"}), status=400)
 
     if request.method == "GET":
         return show_game(id)
 
     if request.method == "PUT":
-        if "token" not in request.args:
-            return Response("security token missing", status=400)
-        if request.args.get("token") != temp["token"]:
-            return Response("incorrect token", status=401)
-        if "word" not in request.args:
-            return Response("No word submitted", status=400)
-        word = request.args.get("word")
+        if "token" not in content:
+            return Response(json.dumps({"message": "token was not provided"}), status=400)
+        if content["token"] != temp["token"]:
+            return Response(json.dumps({"message": "incorrect token provided"}), status=401)
+        if "word" not in content:
+            return Response(json.dumps({"message": "word was not provided"}), status=400)
+        word = content["word"]
         return play_game(id, word)
 
 def play_game(id: int, word: str):
     temp = games[id][1]
     if word in temp["used_words"]:
-        return Response("you have already tried this valid word", status=200)
+        return Response(json.dumps({"message": "this valid word has already been used"}), status=200)
     else:
         correct = games[id][0].guess_word(word)
         if correct:
-            temp["points"]+=10
+            temp["points"]+=len(word)
             temp["used_words"].add(word)
         else:
-            return Response("word not in board", status=200)
+            return Response(json.dumps({"message": "word is incorrect"}), status=400)
     return Response(json.dumps({
         "id": temp["id"],
         "token": temp["token"],
