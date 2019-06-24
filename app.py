@@ -17,6 +17,7 @@ def land():
 @app.route("/games", methods=["POST"])
 def create_game():
     if request.method == "POST":
+        # catching exceptions
         content = request.get_json()
         if content == None:
             return Response(json.dumps({"message": "JSON payload missing"}), status=400)
@@ -24,6 +25,7 @@ def create_game():
             return Response(json.dumps({"message": "duration was not provided"}), status=400)
         if "random" not in content:
             return Response(json.dumps({"message": "random was not provided"}), status=400)
+        # initializing locals and parsing JSON payload
         global counter, games
         b = None
         id = counter
@@ -32,6 +34,7 @@ def create_game():
         rand = content["random"]
         board = ""
         token = token_generator()
+
         if rand: # generate random Boggle board
             b = Boggle(word_dic)
             board = b.board
@@ -75,7 +78,7 @@ def game(id): #determines all responses to queries in game
         return show_game(id)
 
     if request.method == "PUT":
-        if content == None:
+        if content is None:
             return Response(json.dumps({"message": "JSON payload missing"}), status=400)
         if "token" not in content:
             return Response(json.dumps({"message": "token was not provided"}), status=400)
@@ -91,6 +94,7 @@ def play_game(id: int, word: str):
     if word in temp["used_words"]:
         return Response(json.dumps({"message": "this valid word has already been used"}), status=200)
     else:
+        # check and add points if word is correct
         correct = games[id][0].guess_word(word)
         if correct:
             temp["points"]+=len(word)
