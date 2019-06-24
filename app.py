@@ -45,7 +45,6 @@ def create_game():
                 board = board.strip("\n")
                 b = Boggle(word_dic, board)
                 f.close()
-        print(b.show_board())
         temp = { # dic for storing game data
         "id": id,
         "token": token,
