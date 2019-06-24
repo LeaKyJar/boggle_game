@@ -9,19 +9,19 @@
     <h2>Create Game</h2>
     <h3>Make a POST request to https://boggle-game-kenjyi.herokuapp.com/games with the following parameters to create a new Boggle game:</h3>
     <h4><ul>
-        <li>`duration` (required): the time (in seconds) that specifies the duration of the game</li>
-        <li>`random` (required): if `true`, then the game will be generated with random board.  Otherwise, it will be generated based on input.</li>
-        <li>`board` (optional): if `random` is not true, this will be used as the board for new game. If this is not present, new game will get the default board from `test_board.txt`</li>
+        <li>`duration` (required)(JSON payload): the time (in seconds) that specifies the duration of the game</li>
+        <li>`random` (required)(JSON payload): if `true`, then the game will be generated with random board.  Otherwise, it will be generated based on input.</li>
+        <li>`board` (optional)(JSON payload): if `random` is not true, this will be used as the board for new game. If this is not present, new game will get the default board from `test_board.txt`</li>
     </ul></h4><h2>Play Game</h2>
     <h3>Make a PUT request to https://boggle-game-kenjyi.herokuapp.com/games/[id] with the following parameters to try a word in the Boggle game:</h3>
     <h4><ul>
-        <li>'id' (required): The ID of the game</li>
-        <li>`token` (required): The token for authenticating the game</li>
-        <li>`word` (required): The word that can be used to play the game</li>
+        <li>'id' (required)(part of url): The ID of the game</li>
+        <li>`token` (required)(JSON payload): The token for authenticating the game</li>
+        <li>`word` (required)(JSON payload): The word that can be used to play the game</li>
     </ul></h4></ul></h4><h2>Show Game</h2>
     <h3>Make a GET request to https://boggle-game-kenjyi.herokuapp.com/games/[id] with the following parameters to get current state of the game in the Boggle game:</h3>
     <h4><ul>
-        <li>'id' (required): The ID of the game</li>
+        <li>'id' (required)(part of url): The ID of the game</li>
     </ul></h4>
 </body>
 </html>

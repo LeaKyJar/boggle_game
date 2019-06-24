@@ -62,8 +62,6 @@ def create_game():
 @app.route("/games/<id>", methods=["GET","PUT"])
 def game(id): #determines all responses to queries in game
     content = request.get_json()
-    if content == None:
-        return Response(json.dumps({"message": "JSON payload missing"}), status=400)
     id = int(id)
     if id not in games:
         return Response(json.dumps({"message": "invalid id"}), status=404)
@@ -78,6 +76,8 @@ def game(id): #determines all responses to queries in game
         return show_game(id)
 
     if request.method == "PUT":
+        if content == None:
+            return Response(json.dumps({"message": "JSON payload missing"}), status=400)
         if "token" not in content:
             return Response(json.dumps({"message": "token was not provided"}), status=400)
         if content["token"] != temp["token"]:

@@ -108,18 +108,4 @@ class Boggle:
         board = ''.join(c for c in board if c not in "[]''")
         return board
 
-# fd = open("dictionary.txt", "r")
-# word_dic = str(fd.read()).split("\n")
-# fd.close()
-# b = Boggle(word_dic)
-# print(b.show_board())
-# print(b.guess_word("TAP"))
-#
-# f = open("test_board.txt", "r")
-# board_str = str(f.readline())
-# board_str = board_str.strip("\n")
-# f.close()
-# b = Boggle(word_dic, board_str)
-# print(b.show_board())
-# print(b.guess_word("SEX"))
 
